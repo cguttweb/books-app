@@ -1,13 +1,40 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Vite App</title>
-  </head>
-  <body>
-    <div id="app"></div>
-    <script type="module" src="/main.js"></script>
-  </body>
+
+<head>
+  <meta charset="UTF-8" />
+  <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Vite App</title>
+  <script src="https://unpkg.com/dexie/dist/dexie.js"></script>
+</head>
+
+<body>
+  <div id="app"></div>
+  <script type="module" src="/main.js"></script>
+  <script>
+    let Books = []
+    // create database
+    var db = new Dexie("BooksDatabase");
+
+    db.version(1).stores({
+      books: `
+    id,
+    title,
+    author,
+    format`,
+    });
+
+    // stores some values
+    db.books.bulkPut([
+      {id: 1, title: "The Ancestors", author: 'Alice Roberts', format: 'hardback'},
+      {id: 2, title: "Cleopatra", author: 'Joyce Tydelsey', format: 'hardback'}
+    ]).then(() => {
+
+      return db.books.toArray();
+
+    });
+  </script>
+</body>
+
 </html>
