@@ -10,52 +10,54 @@
 </head>
 
 <body>
-  <div id="app"></div>
-  <h1>My Books 📚</h1>
-  <form id="books-form">
-    <label for="title">Title</label>
-    <input type="text" name="title" id="bookTitle" value="" required>
-    <label for="author">Author</label>
-    <input type="text" name="author" id="bookAuthor" value="">
-    <label for="format">Format</label>
-    <select name="format" id="bookFormat" required>
-      <option value="null">Please Select</option>
-      <option value="hardback">Hardback</option>
-      <option value="paperback">Paperback</option>
-      <option value="ebook">eBook</option>
-    </select>
-    <label for="category">Category</label>
-    <select name="category" id="category">
-      <option value="null">Please Select</option>
-      <option value="fiction">Fiction</option>
-      <option value="non-fiction">Non-Fiction</option>
-    </select>
-    <label for="genre">Genre</label>
-    <select name="genre" id="genre">
-      <option value="" null>Please select</option>
-      <option value="art-photography">Art & Photography</option>
-      <option value="autobiography">Autobiography</option>
-      <option value="biography">Biography</option>
-      <option value="crime">Crime</option>
-      <option value="fantasy">Fantasy</option>
-      <option value="food-drink">Food & Drink</option>
-      <option value="history">History</option>
-      <option value="mystery">Mystery</option>
-      <option value="sci-fi">Science Fiction</option>
-      <option value="sport">Sport</option>
-      <option value="travel">Travel</option>
-      <option value="other">Other</option>
-    </select>
-    <label for="isbn">ISBN</label>
-    <input type="text" name="isbn" id="isbn" value="">
-    <label for="publisher">Publisher</label>
-    <input type="text" name="publisher" id="bookPublisher" value="">
-    <label for="yearPublished">Year Published</label>
-    <input type="number" name="yearPublished" id="bookYearPublished" value="">
-    <button id="addBook">Add Book</button>
-  </form>
+  <main>
+    <div id="app"></div>
+    <h1>My Books 📚</h1>
+    <form id="books-form">
+      <label for="title">Title</label>
+      <input type="text" name="title" id="bookTitle" required>
+      <label for="author">Author</label>
+      <input type="text" name="author" id="bookAuthor">
+      <label for="format">Format</label>
+      <select name="format" id="bookFormat" required>
+        <option value="null">Please Select</option>
+        <option value="hardback">Hardback</option>
+        <option value="paperback">Paperback</option>
+        <option value="ebook">eBook</option>
+      </select>
+      <label for="category">Category</label>
+      <select name="category" id="bookCategory">
+        <option value="null">Please Select</option>
+        <option value="fiction">Fiction</option>
+        <option value="non-fiction">Non-Fiction</option>
+      </select>
+      <label for="genre">Genre</label>
+      <select name="genre" id="bookGenre">
+        <option value="null">Please select</option>
+        <option value="art-photography">Art &amp; Photography</option>
+        <option value="autobiography">Autobiography</option>
+        <option value="biography">Biography</option>
+        <option value="crime">Crime</option>
+        <option value="fantasy">Fantasy</option>
+        <option value="food-drink">Food &amp; Drink</option>
+        <option value="history">History</option>
+        <option value="mystery">Mystery</option>
+        <option value="sci-fi">Science Fiction</option>
+        <option value="sport">Sport</option>
+        <option value="travel">Travel</option>
+        <option value="other">Other</option>
+      </select>
+      <label for="isbn">ISBN</label>
+      <input type="text" name="isbn" id="bookIsbn">
+      <label for="publisher">Publisher</label>
+      <input type="text" name="publisher" id="bookPublisher">
+      <label for="yearPublished">Year Published</label>
+      <input type="number" name="yearPublished" id="bookYearPublished">
+      <button id="addBook">Add Book</button>
+    </form>
 
-  <script type="module" src="/main.js"></script>
+    <script type="module" src="/main.js"></script>
+  </main>
 </body>
 
 </html>
