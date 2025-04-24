@@ -59,7 +59,7 @@ form {
     justify-content: flex-start;
   }
   & input {
-    border-radius: 1rem;
+    border-radius: 0.5em;
     padding: 1rem;
     max-width: 50rem;
   }
