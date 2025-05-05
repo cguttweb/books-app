@@ -35,12 +35,18 @@
         <input type="text" id="isbn" name="isbn" />
 
         <label for="format">Format:</label>
-        <input type="text" id="format" name="format" />
+        <select id="format" name="format">
+          <option value="">Please select...</option>
+          <option value="ebook">eBook</option>
+          <option value="paperback">Paperback</option>
+          <option value="hardback">Hardback</option>
+          <option value="audiobook">Audiobook</option>
+        </select>
 
         <button id="addBook" type="submit">Add Book</button>
       </form>
 
-      <table id="book-table">
+      <table>
         <thead>
           <tr>
             <th>Title</th>
@@ -53,7 +59,7 @@
             <th>Format</th>
           </tr>
         </thead>
-        <tbody>
+        <tbody id="book-table">
           <!-- Rows of book data will go here -->
         </tbody>
       </table>

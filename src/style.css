@@ -19,6 +19,7 @@ form {
 
 label {
   align-self: flex-start;
+  padding: 1rem 0;
 }
 
 @media (prefers-color-scheme:dark){
