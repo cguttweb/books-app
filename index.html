@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Books App</title>
+</head>
+
+<body>
+  <main>
+    <h1>My Books List</h1>
+
+    <section>
+      <form id="book-form" method="POST">
+        <label for="title">Title:</label>
+        <input type="text" id="title" name="title" required>
+        <label for="author">Author:</label>
+        <input type="text" id="author" name="author" required>
+        <label for="genre">Genre:</label>
+        <select name="genre" id="genre">
+          <option>Fiction</option>
+          <option>Non-fiction</option>
+          <option>Science Fiction</option>
+          <option>Fantasy</option>
+          <option>Mystery</option>
+          <option>Biography</option>
+          <option>History</option>
+          <option>Other</option>
+        </select>
+        <label for="formt">Format:</label>
+        <select name="format" id="format" required>
+          <option value="null">Please select</option>
+          <option value="hardback">Hardback</option>
+          <option value="paperback">Paperback</option>
+          <option value="ebook">eBook</option>
+        </select>
+        <label for="publisher">Publisher:</label>
+        <input type="text" name="publisher" id="publisher">
+        <label for="yearPublished">Year Published:</label>
+        <input type="number" name="yearPublished" id="yearPublished">
+        <label for="isbn">ISBN:</label>
+        <input type="text" name="isbn" id="isbn">
+        <label for="read">Read:</label>
+        <input type="checkbox" name="read" id="read">
+        <label for="rating">Rating:</label>
+        <select name="rating" id="rating">
+          <option value="null">Please select</option>
+          <option value="1">1</option>
+          <option value="2">2</option>
+          <option value="3">3</option>
+          <option value="4">4</option>
+          <option value="5">5</option>
+        </select>
+        <label for="notes">Notes:</label>
+        <textarea name="notes" id="notes"></textarea>
+        <button type="submit">Add Book</button>
+      </form>
+    </section>
+
+    <h2>My Books Library</h2>
+    <table id="books-table">
+      <thead>
+        <tr>
+          <th>Title</th>
+          <th>Author</th>
+          <th>Genre</th>
+          <th>Format</th>
+          <th>Publisher</th>
+          <th>Year Published</th>
+          <th>ISBN</th>
+          <th>Read</th>
+          <th>Rating</th>
+          <th>Notes</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+
+  </main>
+  <footer></footer>
+  <script type="module" src="/src/main.js"></script>
+</body>
+
+</html>
