@@ -35,23 +35,44 @@ async function loadBooks() {
         <td>${book.genre || ""}</td>
         <td>${book.format || ""}</td>
         <td>${book.publisher || ""}</td>
-        <td>${book.yearPublished || ""}</td>
+        <td>${book.year_published || ""}</td>
         <td>${book.isbn || ""}</td>
         <td>${book.read ? "✅" : "X"}</td>
         <td>${book.rating || ""}</td>
         <td>${book.notes || ""}</td>
+        <td><button class="edit">Edit</button></td>
+        <td><button class="remove" data-id=${book.id}>X</button></td>
       </tr>
     `
     )
     .join("")
+
+  const removeButtons = document.querySelectorAll(".remove")
+
+  removeButtons.forEach((btn) => {
+    btn.addEventListener("click", async (e) => {
+      const row = e.target.closest("tr")
+      const bookId = e.target.dataset.id
+      console.log("Deleting book ID:", bookId)
+
+      // remove book row from UI
+      row.remove()
+      // remove from supabase db
+      const { data, error } = await supabase
+        .from("books")
+        .delete()
+        .eq("id", bookId)
+        .select()
+    })
+  })
 }
 
 loadBooks()
 
-async function addBooks() {
-  const { data, error } = await supabase.from("books").insert()
-  console.log(data)
-}
+// async function addBooks() {
+//   const { data, error } = await supabase.from("books").insert()
+//   console.log(data)
+// }
 
 form.addEventListener("submit", async (e) => {
   e.preventDefault()

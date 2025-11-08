@@ -13,10 +13,14 @@
   -moz-osx-font-smoothing: grayscale;
 
   font-size: 62.5%;
+  --remove-red: rgb(204, 0, 0);
+  --white: rgb(255, 255, 255);
+  --blue: rgb(0, 47, 255);
 }
 
 body {
   font-size: 1.6rem;
+  margin: 0 auto;
 }
 
 h1, h2 {
@@ -54,13 +58,39 @@ select {
   padding: 0.5rem;
 }
 
-input[type=submit]{
-  
-}
-
 input[type=checkbox]{
   height: 20px;
   width: 20px;
+}
+
+button[type=submit]{
+  margin-top: 1rem;
+  padding: 0.5rem;
+}
+
+table {
+  border: 1px solid white;
+}
+
+table th,
+table tr {
+  border-bottom: 1px solid white;
+  text-align: left;
+}
+
+.remove {
+  background-color: var(--remove-red);
+  border: 1px solid var(--remove-red);
+  color: var(--white);
+  font-size: 1.6rem;
+}
+
+.edit {
+  background-color: var(--blue);
+  border: 1px solid var(--blue);
+  color: var(--white);
+  font-size: 1.6rem;
+  margin-right: 0.5rem;
 }
 
 footer {
@@ -68,7 +98,8 @@ footer {
 }
 
 @media (min-width: 60rem){
-
+  form {
+  }
 }
 
 @media (prefers-color-scheme: light) {
