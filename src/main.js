@@ -40,12 +40,175 @@ async function loadBooks() {
         <td>${book.read ? "✅" : "X"}</td>
         <td>${book.rating || ""}</td>
         <td>${book.notes || ""}</td>
-        <td><button class="edit">Edit</button></td>
+        <td><button class="edit" data-id=${book.id}>Edit</button></td>
         <td><button class="remove" data-id=${book.id}>X</button></td>
       </tr>
     `
     )
     .join("")
+
+  const modalContainer = document.querySelector('.modal-container')
+  const formContainer = document.querySelector('.form-container')
+  const editBtns = document.querySelectorAll('.edit')
+
+
+  function editForm() {
+    formContainer.innerHTML = `
+    <form id="book-form" method="POST">
+      <label for="title">Title:</label>
+      <input type="text" id="title" name="title" required>
+      <label for="author">Author:</label>
+      <input type="text" id="author" name="author" required>
+
+      <label for="genre">Genre:</label>
+      <select name="genre" id="genre">
+        <option>Autobiography</option>
+        <option>Biography</option>
+        <option>Fantasy</option>
+        <option>Fiction</option>
+        <option>History</option>
+        <option>Mystery</option>
+        <option>Mythology</option>
+        <option>Nature/Natural History</option>
+        <option>Non-fiction</option>
+        <option>Science Fiction</option>
+        <option>Other</option>
+      </select>
+
+      <label for="format">Format:</label>
+      <select name="format" id="format" required>
+        <option value="null">Please select</option>
+        <option value="hardback">Hardback</option>
+        <option value="paperback">Paperback</option>
+        <option value="ebook">eBook</option>
+      </select>
+
+      <label for="cost">Cost:</label>
+      <input type="" id="cost" name="cost">
+
+      <label for="publisher">Publisher:</label>
+      <input type="text" name="publisher" id="publisher">
+
+      <label for="year_published">Year Published:</label>
+      <input type="number" name="year_published" id="year_published">
+
+      <label for="isbn">ISBN:</label>
+      <input type="text" name="isbn" id="isbn">
+
+      <label for="read">Read:</label>
+      <input type="checkbox" name="read" id="read">
+
+      <label for="rating">Rating:</label>
+      <select name="rating" id="rating">
+        <option value="null">Please select</option>
+        <option value="1">1</option>
+        <option value="2">2</option>
+        <option value="3">3</option>
+        <option value="4">4</option>
+        <option value="5">5</option>
+      </select>
+
+      <label for="notes">Notes:</label>
+      <textarea name="notes" id="notes"></textarea>
+
+      <button type="submit">Save changes</button>
+    </form>
+  `;
+
+    modal.classList.remove('hidden');
+
+    return formContainer.querySelector('#book-form');
+  }
+
+  editBtns.forEach((btn => {
+    btn.addEventListener("click", async (e) => {
+      const row = e.target.closest("tr");
+      const bookId = e.target.dataset.id;
+      const tds = row.querySelectorAll('td');
+
+      const book = {
+        title: tds[0].textContent.trim(),
+        author: tds[1].textContent.trim(),
+        genre: tds[2].textContent.trim(),
+        format: tds[3].textContent.trim(),
+        publisher: tds[4].textContent.trim(),
+        year_published: tds[5].textContent.trim(), // match name you use later
+        isbn: tds[6].textContent.trim(),
+        read: tds[7].textContent.trim() === "✅",   // make it a boolean
+        rating: tds[8].textContent.trim(),
+        notes: tds[9].textContent.trim(),
+      };
+
+      // ✅ now this returns the <form> element
+      const form = editForm();
+
+      const titleInput = form.querySelector('#title');
+      const authorInput = form.querySelector('#author');
+      const genreInput = form.querySelector('#genre');
+      const formatInput = form.querySelector('#format');
+      const publisherInput = form.querySelector('#publisher');
+      const yearInput = form.querySelector('#year_published');
+      const isbnInput = form.querySelector('#isbn');
+      const readInput = form.querySelector('#read');
+      const ratingInput = form.querySelector('#rating');
+      const notesInput = form.querySelector('#notes');
+
+      // Pre-fill values
+      titleInput.value = book.title;
+      authorInput.value = book.author;
+      if (book.genre) genreInput.value = book.genre;
+      if (book.format) formatInput.value = book.format;
+      publisherInput.value = book.publisher;
+      yearInput.value = book.year_published;
+      isbnInput.value = book.isbn;
+      readInput.checked = book.read;               // boolean now
+      ratingInput.value = book.rating || 'null';
+      notesInput.value = book.notes;
+
+      form.addEventListener('submit', async (evt) => {
+        evt.preventDefault();
+
+        const payload = {
+          title: titleInput.value.trim(),
+          author: authorInput.value.trim(),
+          genre: genreInput.value,
+          format: formatInput.value === 'null' ? null : formatInput.value,
+          publisher: publisherInput.value.trim() || null,
+          year_published: yearInput.value ? Number(yearInput.value) : null,
+          isbn: isbnInput.value.trim() || null,
+          read: readInput.checked,
+          rating: ratingInput.value === 'null' ? null : Number(ratingInput.value),
+          notes: notesInput.value.trim() || null,
+        };
+
+        const { error } = await supabase
+          .from('books')
+          .update(payload)
+          .eq('id', bookId);
+
+        if (error) {
+          console.error('Error updating book', error);
+          return;
+        }
+
+        // update table cells
+        tds[0].textContent = payload.title;
+        tds[1].textContent = payload.author;
+        tds[2].textContent = payload.genre;
+        tds[3].textContent = payload.format || '';
+        tds[4].textContent = payload.publisher || '';
+        tds[5].textContent = payload.year_published || '';
+        tds[6].textContent = payload.isbn || '';
+        tds[7].textContent = payload.read ? "✅" : "X";
+        tds[8].textContent = payload.rating || '';
+        tds[9].textContent = payload.notes || '';
+
+        modalContainer.classList.add('hidden');
+        modalContainer.innerHTML = '';
+      });
+    });
+  }));
+
 
   const removeButtons = document.querySelectorAll(".remove")
 
@@ -69,11 +232,6 @@ async function loadBooks() {
 
 loadBooks()
 
-// async function addBooks() {
-//   const { data, error } = await supabase.from("books").insert()
-//   console.log(data)
-// }
-
 form.addEventListener("submit", async (e) => {
   e.preventDefault()
   const formData = new FormData(form)
@@ -93,3 +251,4 @@ form.addEventListener("submit", async (e) => {
     loadBooks()
   }
 })
+

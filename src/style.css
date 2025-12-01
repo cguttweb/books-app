@@ -64,6 +64,7 @@ input[type=checkbox]{
 }
 
 button[type=submit]{
+  cursor: pointer;
   margin-top: 1rem;
   padding: 0.5rem;
 }
@@ -93,13 +94,33 @@ table tr {
   margin-right: 0.5rem;
 }
 
+.modal-container {
+  background-color: rgba(0, 0, 0, 0.7);
+  min-height: 100%;
+  position: absolute;
+  top: 10rem;
+  width: 100%;
+}
+
+.hidden {
+  display: none;
+}
+
+.form-container {
+  align-items: center;
+  display: flex;
+  justify-content: center;
+}
+
+.form-container form {
+  width: 40rem;
+}
+
 footer {
   display: block;
 }
 
 @media (min-width: 60rem){
-  form {
-  }
 }
 
 @media (prefers-color-scheme: light) {
