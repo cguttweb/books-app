@@ -12,6 +12,21 @@
   <main>
     <h1>My Books List</h1>
 
+    <!-- Login form -->
+    <div id="auth-panel">
+      <form id="login-form">
+        <input type="email" id="login-email" placeholder="Email" required />
+        <input type="password" id="login-password" placeholder="Password" required />
+        <button type="submit">Log in</button>
+      </form>
+
+      <div id="auth-info">
+        <span id="auth-status">Not logged in</span>
+        <button id="logout-btn" style="display:none;">Log out</button>
+      </div>
+    </div>
+
+
     <section>
       <form id="book-form" method="POST">
         <label for="title">Title:</label>
@@ -21,17 +36,17 @@
         <label for="genre">Genre:</label>
         <select name="genre" id="genre">
           <option value="null">Please select</option>
-          <option>Autobiography</option>
-          <option>Biography</option>
-          <option>Fantasy</option>
-          <option>Fiction</option>
-          <option>History</option>
-          <option>Mystery</option>
-          <option>Mythology</option>
-          <option>Nature/Natural History</option>
-          <option>Non-fiction</option>
-          <option>Science Fiction</option>
-          <option>Other</option>
+          <option value="autobiography">Autobiography</option>
+          <option value="biography">Biography</option>
+          <option value="fantasy">Fantasy</option>
+          <option value="fiction">Fiction</option>
+          <option value="history">History</option>
+          <option value="mystery">Mystery</option>
+          <option value="mythology">Mythology</option>
+          <option value="nature">Nature/Natural History</option>
+          <option value="non-fiction">Non-fiction</option>
+          <option value="sci-fi">Science Fiction</option>
+          <option value="other">Other</option>
         </select>
         <label for="format">Format:</label>
         <select name="format" id="format" required>

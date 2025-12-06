@@ -16,6 +16,56 @@ footer.innerHTML = `
 </p>
 `
 
+// Login form for auth
+const loginForm = document.querySelector('#login-form')
+const loginEmail = document.querySelector('#login-email')
+const loginPassword = document.querySelector('#login-password')
+const logoutBtn = document.querySelector('#logout-btn')
+const authStatus = document.querySelector("#auth-status")
+
+// Auth UI
+
+async function updateAuthUI() {
+  const { data: session } = await supabase.auth.getSession()
+
+  if (session) {
+    if (loginForm) loginForm.style.display = "none"
+    if (logoutBtn) logoutBtn.style.display = "inline-block"
+    if (authStatus) authStatus.textContent = `Logged in as ${session.user.email}`
+  } else {
+    if (loginForm) loginForm.style.display = 'block'
+    if (logoutBtn) logoutBtn.style.display = 'none'
+    if (authStatus) authStatus.textContent = 'Not logged in'
+  }
+}
+
+// Login form
+loginForm.addEventListener('submit', async e => {
+  e.preventDefault()
+
+  const email = loginEmail.value;
+  const password = loginPassword.value;
+
+  const { error } = await supabase.auth.signInWithPassword({ email, password });
+
+  if (error) {
+    alert(`Login failed: ${error.message}`);
+    return;
+  }
+
+  loginPassword.value = ''
+
+  await updateAuthUI()
+  await loadBooks()
+})
+
+// Logout functionality
+logoutBtn.addEventListener('click', async () => {
+  await supabase.auth.signOut();
+  await updateAuthUI();
+  await loadBooks();
+})
+
 const form = document.querySelector("#book-form")
 const bookList = document.querySelector("#books-table tbody")
 
@@ -115,7 +165,7 @@ async function loadBooks() {
     </form>
   `;
 
-    modal.classList.remove('hidden');
+    modalContainer.classList.remove('hidden');
 
     return formContainer.querySelector('#book-form');
   }
