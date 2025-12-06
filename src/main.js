@@ -139,7 +139,6 @@ async function loadBooks() {
         notes: tds[9].textContent.trim(),
       };
 
-      // ✅ now this returns the <form> element
       const form = editForm();
 
       const titleInput = form.querySelector('#title');
@@ -204,7 +203,7 @@ async function loadBooks() {
         tds[9].textContent = payload.notes || '';
 
         modalContainer.classList.add('hidden');
-        modalContainer.innerHTML = '';
+        formContainer.innerHTML = '';
       });
     });
   }));
