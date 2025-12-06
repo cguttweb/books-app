@@ -73,6 +73,7 @@ async function loadBooks() {
   const { data, error } = await supabase
     .from("books")
     .select("*")
+    .range(0, 9)
     .order("title")
   if (error) return console.error(error)
 
