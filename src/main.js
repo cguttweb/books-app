@@ -85,10 +85,8 @@ async function loadBooks() {
         <td>${book.title}</td>
         <td>${book.author || ""}</td>
         <td>${book.genre || ""}</td>
-        <td>${book.format || ""}</td>
         <td>${book.publisher || ""}</td>
         <td>${book.year_published || ""}</td>
-        <td>${book.isbn || ""}</td>
         <td>${book.read ? "✅" : "X"}</td>
         <td>${book.rating || ""}</td>
         <td>${book.notes || ""}</td>
@@ -184,11 +182,10 @@ async function loadBooks() {
         genre: tds[2].textContent.trim(),
         format: tds[3].textContent.trim(),
         publisher: tds[4].textContent.trim(),
-        year_published: tds[5].textContent.trim(), // match name you use later
-        isbn: tds[6].textContent.trim(),
-        read: tds[7].textContent.trim() === "✅",   // make it a boolean
-        rating: tds[8].textContent.trim(),
-        notes: tds[9].textContent.trim(),
+        year_published: tds[5].textContent.trim(),
+        read: tds[6].textContent.trim() === "✅",
+        rating: tds[7].textContent.trim(),
+        notes: tds[8].textContent.trim(),
       };
 
       const form = editForm();
@@ -211,7 +208,6 @@ async function loadBooks() {
       if (book.format) formatInput.value = book.format;
       publisherInput.value = book.publisher;
       yearInput.value = book.year_published;
-      isbnInput.value = book.isbn;
       readInput.checked = book.read;               // boolean now
       ratingInput.value = book.rating || 'null';
       notesInput.value = book.notes;
