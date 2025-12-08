@@ -70,6 +70,7 @@ const form = document.querySelector("#book-form")
 const bookList = document.querySelector("#books-table tbody")
 
 async function loadBooks() {
+  // look at further filtering to remove those not given a rating or not read...
   const { data, error } = await supabase
     .from("books")
     .select("*")
