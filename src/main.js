@@ -159,8 +159,8 @@ async function loadBooks() {
       const book = {
         title: tds[0].textContent.trim(),
         author: tds[1].textContent.trim(),
-        genre: tds[2].textContent.trim(),
-        format: tds[3].textContent.trim(),
+        format: tds[2].textContent.trim(),
+        genre: tds[3].textContent.trim(),
         publisher: tds[4].textContent.trim(),
         year_published: tds[5].textContent.trim(),
         notes: tds[6].textContent.trim(),
@@ -170,8 +170,8 @@ async function loadBooks() {
 
       const titleInput = form.querySelector('#title');
       const authorInput = form.querySelector('#author');
-      const genreInput = form.querySelector('#genre');
       const formatInput = form.querySelector('#format');
+      const genreInput = form.querySelector('#genre');
       const publisherInput = form.querySelector('#publisher');
       const yearInput = form.querySelector('#year_published');
       const notesInput = form.querySelector('#notes');
@@ -211,8 +211,8 @@ async function loadBooks() {
         // update table cells
         tds[0].textContent = payload.title;
         tds[1].textContent = payload.author;
-        tds[3].textContent = payload.format || '';
-        tds[2].textContent = payload.genre;
+        tds[2].textContent = payload.format || '';
+        tds[3].textContent = payload.genre;
         tds[4].textContent = payload.publisher || '';
         tds[5].textContent = payload.year_published || '';
         tds[6].textContent = payload.notes || '';
