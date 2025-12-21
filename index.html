@@ -33,6 +33,13 @@
         <input type="text" id="title" name="title" required>
         <label for="author">Author:</label>
         <input type="text" id="author" name="author" required>
+        <label for="format">Format:</label>
+        <select name="format" id="format" required>
+          <option value="null">Please select</option>
+          <option value="hardback">Hardback</option>
+          <option value="paperback">Paperback</option>
+          <option value="ebook">eBook</option>
+        </select>
         <label for="genre">Genre:</label>
         <select name="genre" id="genre" multiple>
           <option value="null">Please select</option>
@@ -47,13 +54,6 @@
           <option value="non-fiction">Non-fiction</option>
           <option value="sci-fi">Science Fiction</option>
           <option value="other">Other</option>
-        </select>
-        <label for="format">Format:</label>
-        <select name="format" id="format" required>
-          <option value="null">Please select</option>
-          <option value="hardback">Hardback</option>
-          <option value="paperback">Paperback</option>
-          <option value="ebook">eBook</option>
         </select>
         <label for="cost">Cost:</label>
         <input type="text" name="cost" id="cost">
@@ -86,8 +86,8 @@
         <tr>
           <th>Title</th>
           <th>Author</th>
-          <th>Genre</th>
           <th>Format</th>
+          <th>Genre</th>
           <th>Publisher</th>
           <th>Year</th>
           <th colspan="2">Notes</th>

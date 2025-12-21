@@ -109,6 +109,14 @@ async function loadBooks() {
       <label for="author">Author:</label>
       <input type="text" id="author" name="author" required>
 
+      <label for="format">Format:</label>
+      <select name="format" id="format" required>
+        <option value="null">Please select</option>
+        <option value="hardback">Hardback</option>
+        <option value="paperback">Paperback</option>
+        <option value="ebook">eBook</option>
+      </select>
+
       <label for="genre">Genre:</label>
       <select name="genre" id="genre" multiple>
         <option>Autobiography</option>
@@ -122,14 +130,6 @@ async function loadBooks() {
         <option>Non-fiction</option>
         <option>Science Fiction</option>
         <option>Other</option>
-      </select>
-
-      <label for="format">Format:</label>
-      <select name="format" id="format" required>
-        <option value="null">Please select</option>
-        <option value="hardback">Hardback</option>
-        <option value="paperback">Paperback</option>
-        <option value="ebook">eBook</option>
       </select>
 
       <label for="publisher">Publisher:</label>
@@ -179,8 +179,8 @@ async function loadBooks() {
       // Pre-fill values
       titleInput.value = book.title;
       authorInput.value = book.author;
-      if (book.genre) genreInput.value = book.genre;
       if (book.format) formatInput.value = book.format;
+      if (book.genre) genreInput.value = book.genre;
       publisherInput.value = book.publisher;
       yearInput.value = book.year_published;
       notesInput.value = book.notes;
@@ -191,8 +191,8 @@ async function loadBooks() {
         const payload = {
           title: titleInput.value.trim(),
           author: authorInput.value.trim(),
-          genre: genreInput.value,
           format: formatInput.value === 'null' ? null : formatInput.value,
+          genre: genreInput.value,
           publisher: publisherInput.value.trim() || null,
           year_published: yearInput.value ? Number(yearInput.value) : null,
           notes: notesInput.value.trim() || null,
@@ -211,8 +211,8 @@ async function loadBooks() {
         // update table cells
         tds[0].textContent = payload.title;
         tds[1].textContent = payload.author;
-        tds[2].textContent = payload.genre;
         tds[3].textContent = payload.format || '';
+        tds[2].textContent = payload.genre;
         tds[4].textContent = payload.publisher || '';
         tds[5].textContent = payload.year_published || '';
         tds[6].textContent = payload.notes || '';
