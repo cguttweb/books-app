@@ -75,7 +75,7 @@ async function loadBooks() {
     .from("books")
     .select("*")
     .range(0, 9)
-    .order("title")
+    .order("created_at")
   if (error) return console.error(error)
 
   bookList.innerHTML = data
