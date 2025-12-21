@@ -74,8 +74,8 @@ async function loadBooks() {
   const { data, error } = await supabase
     .from("books")
     .select("*")
-    .range(0, 9)
-    .order("created_at")
+    .limit(10)
+    .order('created_at', { ascending: false })
   if (error) return console.error(error)
 
   bookList.innerHTML = data
@@ -84,11 +84,10 @@ async function loadBooks() {
       <tr>
         <td>${book.title}</td>
         <td>${book.author || ""}</td>
+        <td>${book.format || ""}</td>
         <td>${book.genre || ""}</td>
         <td>${book.publisher || ""}</td>
         <td>${book.year_published || ""}</td>
-        <td>${book.read ? "✅" : "X"}</td>
-        <td>${book.rating || ""}</td>
         <td>${book.notes || ""}</td>
         <td><button class="edit" data-id=${book.id}>Edit</button></td>
         <td><button class="remove" data-id=${book.id}>X</button></td>
@@ -111,7 +110,7 @@ async function loadBooks() {
       <input type="text" id="author" name="author" required>
 
       <label for="genre">Genre:</label>
-      <select name="genre" id="genre">
+      <select name="genre" id="genre" multiple>
         <option>Autobiography</option>
         <option>Biography</option>
         <option>Fantasy</option>
@@ -133,30 +132,11 @@ async function loadBooks() {
         <option value="ebook">eBook</option>
       </select>
 
-      <label for="cost">Cost:</label>
-      <input type="" id="cost" name="cost">
-
       <label for="publisher">Publisher:</label>
       <input type="text" name="publisher" id="publisher">
 
       <label for="year_published">Year Published:</label>
       <input type="number" name="year_published" id="year_published">
-
-      <label for="isbn">ISBN:</label>
-      <input type="text" name="isbn" id="isbn">
-
-      <label for="read">Read:</label>
-      <input type="checkbox" name="read" id="read">
-
-      <label for="rating">Rating:</label>
-      <select name="rating" id="rating">
-        <option value="null">Please select</option>
-        <option value="1">1</option>
-        <option value="2">2</option>
-        <option value="3">3</option>
-        <option value="4">4</option>
-        <option value="5">5</option>
-      </select>
 
       <label for="notes">Notes:</label>
       <textarea name="notes" id="notes"></textarea>
