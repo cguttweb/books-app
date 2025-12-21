@@ -263,7 +263,7 @@ async function loadBooks() {
     btn.addEventListener("click", async (e) => {
       const row = e.target.closest("tr")
       const bookId = e.target.dataset.id
-      console.log("Deleting book ID:", bookId)
+      // console.log("Deleting book ID:", bookId)
 
       // remove book row from UI
       row.remove()
@@ -287,14 +287,14 @@ form.addEventListener("submit", async (e) => {
   book.read = formData.get("read") ? true : false
 
   const { data, error } = await supabase.from("books").insert([book])
-  console.log(book)
+  // console.log(book)
 
   if (error) {
     console.error("Insert error:", error)
-    console.log("Error: book not inserted")
+    // console.log("Error: book not inserted")
   } else {
     form.reset()
-    console.log("Book added:", data)
+    // console.log("Book added:", data)
     loadBooks()
   }
 })
