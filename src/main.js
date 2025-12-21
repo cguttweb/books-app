@@ -163,9 +163,7 @@ async function loadBooks() {
         format: tds[3].textContent.trim(),
         publisher: tds[4].textContent.trim(),
         year_published: tds[5].textContent.trim(),
-        read: tds[6].textContent.trim() === "✅",
-        rating: tds[7].textContent.trim(),
-        notes: tds[8].textContent.trim(),
+        notes: tds[6].textContent.trim(),
       };
 
       const form = editForm();
@@ -176,9 +174,6 @@ async function loadBooks() {
       const formatInput = form.querySelector('#format');
       const publisherInput = form.querySelector('#publisher');
       const yearInput = form.querySelector('#year_published');
-      const isbnInput = form.querySelector('#isbn');
-      const readInput = form.querySelector('#read');
-      const ratingInput = form.querySelector('#rating');
       const notesInput = form.querySelector('#notes');
 
       // Pre-fill values
@@ -188,8 +183,6 @@ async function loadBooks() {
       if (book.format) formatInput.value = book.format;
       publisherInput.value = book.publisher;
       yearInput.value = book.year_published;
-      readInput.checked = book.read;               // boolean now
-      ratingInput.value = book.rating || 'null';
       notesInput.value = book.notes;
 
       form.addEventListener('submit', async (evt) => {
@@ -202,9 +195,6 @@ async function loadBooks() {
           format: formatInput.value === 'null' ? null : formatInput.value,
           publisher: publisherInput.value.trim() || null,
           year_published: yearInput.value ? Number(yearInput.value) : null,
-          isbn: isbnInput.value.trim() || null,
-          read: readInput.checked,
-          rating: ratingInput.value === 'null' ? null : Number(ratingInput.value),
           notes: notesInput.value.trim() || null,
         };
 
@@ -225,10 +215,7 @@ async function loadBooks() {
         tds[3].textContent = payload.format || '';
         tds[4].textContent = payload.publisher || '';
         tds[5].textContent = payload.year_published || '';
-        tds[6].textContent = payload.isbn || '';
-        tds[7].textContent = payload.read ? "✅" : "X";
-        tds[8].textContent = payload.rating || '';
-        tds[9].textContent = payload.notes || '';
+        tds[6].textContent = payload.notes || '';
 
         modalContainer.classList.add('hidden');
         formContainer.innerHTML = '';
