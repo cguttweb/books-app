@@ -74,7 +74,6 @@ async function loadBooks() {
   const { data, error } = await supabase
     .from("books")
     .select("*")
-    .limit(10)
     .order('created_at', { ascending: false })
   if (error) return console.error(error)
 
