@@ -33,9 +33,9 @@ async function updateAuthUI() {
     if (logoutBtn) logoutBtn.style.display = "inline-block"
     if (authStatus) authStatus.textContent = `Logged in as ${session.user.email}`
   } else {
-    if (loginForm) loginForm.style.display = 'block'
-    if (logoutBtn) logoutBtn.style.display = 'none'
-    if (authStatus) authStatus.textContent = 'Not logged in'
+    if (loginForm) loginForm.style.display = "block"
+    if (logoutBtn) logoutBtn.style.display = "none"
+    if (authStatus) authStatus.style.display = "none"
   }
 }
 
