@@ -87,6 +87,7 @@ async function loadBooks() {
         <td>${book.genre || ""}</td>
         <td>${book.publisher || ""}</td>
         <td>${book.year_published || ""}</td>
+        <td>${book.purchase_date || ""}</td>
         <td>${book.notes || ""}</td>
         <td><button class="edit" data-id=${book.id}>Edit</button></td>
         <td><button class="remove" data-id=${book.id}>X</button></td>
@@ -131,6 +132,9 @@ async function loadBooks() {
         <option>Other</option>
       </select>
 
+      <label for="purchase_date">Date of purchase:</label>
+      <input type="date" name="purchase_date" id="purchase_date">
+
       <label for="publisher">Publisher:</label>
       <input type="text" name="publisher" id="publisher">
 
@@ -162,7 +166,8 @@ async function loadBooks() {
         genre: tds[3].textContent.trim(),
         publisher: tds[4].textContent.trim(),
         year_published: tds[5].textContent.trim(),
-        notes: tds[6].textContent.trim(),
+        purchase_date: tds[6].textContent.trim(),
+        notes: tds[7].textContent.trim(),
       };
 
       const form = editForm();
@@ -171,6 +176,7 @@ async function loadBooks() {
       const authorInput = form.querySelector('#author');
       const formatInput = form.querySelector('#format');
       const genreInput = form.querySelector('#genre');
+      const purchaseDateInput = form.querySelector('#purchase_date');
       const publisherInput = form.querySelector('#publisher');
       const yearInput = form.querySelector('#year_published');
       const notesInput = form.querySelector('#notes');
@@ -180,6 +186,7 @@ async function loadBooks() {
       authorInput.value = book.author;
       if (book.format) formatInput.value = book.format;
       if (book.genre) genreInput.value = book.genre;
+      purchaseDateInput.value = book.purchase_date;
       publisherInput.value = book.publisher;
       yearInput.value = book.year_published;
       notesInput.value = book.notes;
@@ -192,6 +199,7 @@ async function loadBooks() {
           author: authorInput.value.trim(),
           format: formatInput.value === 'null' ? null : formatInput.value,
           genre: genreInput.value,
+          purchase_date: purchaseDateInput.value || null,
           publisher: publisherInput.value.trim() || null,
           year_published: yearInput.value ? Number(yearInput.value) : null,
           notes: notesInput.value.trim() || null,
@@ -214,7 +222,8 @@ async function loadBooks() {
         tds[3].textContent = payload.genre;
         tds[4].textContent = payload.publisher || '';
         tds[5].textContent = payload.year_published || '';
-        tds[6].textContent = payload.notes || '';
+        tds[6].textContent = payload.purchase_date || '';
+        tds[7].textContent = payload.notes || '';
 
         modalContainer.classList.add('hidden');
         formContainer.innerHTML = '';
@@ -251,6 +260,7 @@ form.addEventListener("submit", async (e) => {
 
   const book = Object.fromEntries(formData.entries())
   book.read = formData.get("read") ? true : false
+  book.purchase_date = formData.get("purchase_date") || null
 
   const { data, error } = await supabase.from("books").insert([book])
   // console.log(book)
