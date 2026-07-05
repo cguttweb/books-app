@@ -26,16 +26,29 @@ const authStatus = document.querySelector("#auth-status")
 // Auth UI
 
 async function updateAuthUI() {
-  const { data: session } = await supabase.auth.getSession()
+  const { data, error } = await supabase.auth.getSession()
+
+  if (error) {
+    console.error("Error getting session:", error)
+    return
+  }
+
+  const session = data?.session
 
   if (session) {
     if (loginForm) loginForm.style.display = "none"
     if (logoutBtn) logoutBtn.style.display = "inline-block"
-    if (authStatus) authStatus.textContent = `Logged in as ${session.user.email}`
+    if (authStatus) {
+      authStatus.style.display = "inline"
+      authStatus.textContent = `Logged in as ${session.user?.email || "user"}`
+    }
   } else {
     if (loginForm) loginForm.style.display = "block"
     if (logoutBtn) logoutBtn.style.display = "none"
-    if (authStatus) authStatus.style.display = "none"
+    if (authStatus) {
+      authStatus.style.display = "inline"
+      authStatus.textContent = "Not logged in"
+    }
   }
 }
 
@@ -64,6 +77,14 @@ logoutBtn.addEventListener('click', async () => {
   await supabase.auth.signOut();
   await updateAuthUI();
   await loadBooks();
+})
+
+supabase.auth.onAuthStateChange((_event, session) => {
+  updateAuthUI()
+
+  if (session) {
+    loadBooks()
+  }
 })
 
 const form = document.querySelector("#book-form")
@@ -252,6 +273,7 @@ async function loadBooks() {
   })
 }
 
+updateAuthUI()
 loadBooks()
 
 form.addEventListener("submit", async (e) => {
