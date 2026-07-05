@@ -43,7 +43,7 @@ async function updateAuthUI() {
       authStatus.textContent = `Logged in as ${session.user?.email || "user"}`
     }
   } else {
-    if (loginForm) loginForm.style.display = "block"
+    if (loginForm) loginForm.style.display = "flex"
     if (logoutBtn) logoutBtn.style.display = "none"
     if (authStatus) {
       authStatus.style.display = "inline"
