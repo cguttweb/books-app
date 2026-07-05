@@ -6,7 +6,7 @@ import { supabase } from "./supabase.js"
 const footer = document.querySelector("footer")
 
 footer.innerHTML = `
-<p>Built by <a href="https://github.com/cguttweb">Chloe</a>with 
+<p>Built by <a href="https://github.com/cguttweb">Chloe</a> with 
 <a href="https://vite.dev" target="_blank">
 <img src="${viteLogo}" class="logo" alt="Vite logo" width="30" />
 </a> <span>and</span>
@@ -16,14 +16,199 @@ footer.innerHTML = `
 </p>
 `
 
-// Login form for auth
-const loginForm = document.querySelector('#login-form')
-const loginEmail = document.querySelector('#login-email')
-const loginPassword = document.querySelector('#login-password')
-const logoutBtn = document.querySelector('#logout-btn')
-const authStatus = document.querySelector("#auth-status")
+const GENRE_OPTIONS = `
+  <option value="autobiography">Autobiography</option>
+  <option value="biography">Biography</option>
+  <option value="fantasy">Fantasy</option>
+  <option value="fiction">Fiction</option>
+  <option value="history">History</option>
+  <option value="mystery">Mystery</option>
+  <option value="mythology">Mythology</option>
+  <option value="nature">Nature/Natural History</option>
+  <option value="non-fiction">Non-fiction</option>
+  <option value="sci-fi">Science Fiction</option>
+  <option value="other">Other</option>
+`
 
-// Auth UI
+const loginForm = document.querySelector("#login-form")
+const loginEmail = document.querySelector("#login-email")
+const loginPassword = document.querySelector("#login-password")
+const logoutBtn = document.querySelector("#logout-btn")
+const authStatus = document.querySelector("#auth-status")
+const authError = document.querySelector("#auth-error")
+const authGateMessage = document.querySelector("#auth-gate-message")
+const bookSection = document.querySelector("#book-section")
+const form = document.querySelector("#book-form")
+const bookList = document.querySelector("#books-table tbody")
+const booksCards = document.querySelector("#books-cards")
+const librarySummary = document.querySelector("#library-summary")
+const appMessage = document.querySelector("#app-message")
+const modalContainer = document.querySelector(".modal-container")
+const formContainer = document.querySelector(".form-container")
+const modalCloseBtn = document.querySelector("#modal-close")
+
+let booksCache = []
+let isLoggedIn = false
+
+function escapeHtml(text) {
+  return String(text ?? "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+}
+
+function formatRead(read) {
+  return read
+    ? '<span class="read-badge read-yes">Read</span>'
+    : '<span class="read-badge read-no">Unread</span>'
+}
+
+function formatRating(rating) {
+  if (!rating || rating === "null") return "—"
+  return `${rating}/5`
+}
+
+function showAppMessage(text, type = "success") {
+  appMessage.textContent = text
+  appMessage.className = `app-message ${type}`
+  appMessage.classList.remove("hidden")
+}
+
+function hideAppMessage() {
+  appMessage.classList.add("hidden")
+}
+
+function showAuthError(text) {
+  authError.textContent = text
+  authError.classList.remove("hidden")
+}
+
+function hideAuthError() {
+  authError.textContent = ""
+  authError.classList.add("hidden")
+}
+
+function closeModal() {
+  modalContainer.classList.add("hidden")
+  formContainer.innerHTML = ""
+}
+
+function openEditModal(book) {
+  formContainer.innerHTML = `
+    <form id="edit-book-form">
+      <label for="edit-title">Title:</label>
+      <input type="text" id="edit-title" name="title" required>
+
+      <label for="edit-author">Author:</label>
+      <input type="text" id="edit-author" name="author" required>
+
+      <label for="edit-format">Format:</label>
+      <select name="format" id="edit-format" required>
+        <option value="null">Please select</option>
+        <option value="hardback">Hardback</option>
+        <option value="paperback">Paperback</option>
+        <option value="ebook">eBook</option>
+      </select>
+
+      <label for="edit-genre">Genre:</label>
+      <select name="genre" id="edit-genre">
+        ${GENRE_OPTIONS}
+      </select>
+
+      <label for="edit-purchase_date">Date of purchase:</label>
+      <input type="date" name="purchase_date" id="edit-purchase_date">
+
+      <label for="edit-publisher">Publisher:</label>
+      <input type="text" name="publisher" id="edit-publisher">
+
+      <label for="edit-year_published">Year Published:</label>
+      <input type="number" name="year_published" id="edit-year_published">
+
+      <label for="edit-read">Read:</label>
+      <input type="checkbox" name="read" id="edit-read">
+
+      <label for="edit-rating">Rating:</label>
+      <select name="rating" id="edit-rating">
+        <option value="null">Please select</option>
+        <option value="1">1</option>
+        <option value="2">2</option>
+        <option value="3">3</option>
+        <option value="4">4</option>
+        <option value="5">5</option>
+      </select>
+
+      <label for="edit-notes">Notes:</label>
+      <textarea name="notes" id="edit-notes"></textarea>
+
+      <div class="form-actions">
+        <button type="button" class="btn-secondary" id="edit-cancel">Cancel</button>
+        <button type="submit">Save changes</button>
+      </div>
+    </form>
+  `
+
+  const editForm = formContainer.querySelector("#edit-book-form")
+  editForm.querySelector("#edit-title").value = book.title || ""
+  editForm.querySelector("#edit-author").value = book.author || ""
+  if (book.format) editForm.querySelector("#edit-format").value = book.format
+  if (book.genre) editForm.querySelector("#edit-genre").value = book.genre
+  editForm.querySelector("#edit-purchase_date").value = book.purchase_date || ""
+  editForm.querySelector("#edit-publisher").value = book.publisher || ""
+  editForm.querySelector("#edit-year_published").value = book.year_published || ""
+  editForm.querySelector("#edit-read").checked = Boolean(book.read)
+  if (book.rating) editForm.querySelector("#edit-rating").value = String(book.rating)
+  editForm.querySelector("#edit-notes").value = book.notes || ""
+
+  editForm.querySelector("#edit-cancel").addEventListener("click", closeModal)
+
+  editForm.addEventListener("submit", async (evt) => {
+    evt.preventDefault()
+    hideAppMessage()
+
+    const submitBtn = editForm.querySelector('button[type="submit"]')
+    submitBtn.disabled = true
+    submitBtn.textContent = "Saving..."
+
+    const payload = {
+      title: editForm.querySelector("#edit-title").value.trim(),
+      author: editForm.querySelector("#edit-author").value.trim(),
+      format: editForm.querySelector("#edit-format").value === "null"
+        ? null
+        : editForm.querySelector("#edit-format").value,
+      genre: editForm.querySelector("#edit-genre").value || null,
+      purchase_date: editForm.querySelector("#edit-purchase_date").value || null,
+      publisher: editForm.querySelector("#edit-publisher").value.trim() || null,
+      year_published: editForm.querySelector("#edit-year_published").value
+        ? Number(editForm.querySelector("#edit-year_published").value)
+        : null,
+      read: editForm.querySelector("#edit-read").checked,
+      rating: editForm.querySelector("#edit-rating").value === "null"
+        ? null
+        : editForm.querySelector("#edit-rating").value,
+      notes: editForm.querySelector("#edit-notes").value.trim() || null,
+    }
+
+    const { error } = await supabase
+      .from("books")
+      .update(payload)
+      .eq("id", book.id)
+
+    submitBtn.disabled = false
+    submitBtn.textContent = "Save changes"
+
+    if (error) {
+      showAppMessage(`Could not update book: ${error.message}`, "error")
+      return
+    }
+
+    closeModal()
+    showAppMessage("Book updated.")
+    await loadBooks()
+  })
+
+  modalContainer.classList.remove("hidden")
+}
 
 async function updateAuthUI() {
   const { data, error } = await supabase.auth.getSession()
@@ -34,243 +219,172 @@ async function updateAuthUI() {
   }
 
   const session = data?.session
+  isLoggedIn = Boolean(session)
 
   if (session) {
-    if (loginForm) loginForm.style.display = "none"
-    if (logoutBtn) logoutBtn.style.display = "inline-block"
-    if (authStatus) {
-      authStatus.style.display = "inline"
-      authStatus.textContent = `Logged in as ${session.user?.email || "user"}`
-    }
+    loginForm.style.display = "none"
+    logoutBtn.classList.remove("hidden")
+    authStatus.textContent = `Logged in as ${session.user?.email || "user"}`
+    bookSection.classList.remove("disabled")
+    authGateMessage.classList.add("hidden")
+    hideAuthError()
   } else {
-    if (loginForm) loginForm.style.display = "flex"
-    if (logoutBtn) logoutBtn.style.display = "none"
-    if (authStatus) {
-      authStatus.style.display = "inline"
-      authStatus.textContent = "Not logged in"
-    }
+    loginForm.style.display = "flex"
+    logoutBtn.classList.add("hidden")
+    authStatus.textContent = "Not logged in"
+    bookSection.classList.add("disabled")
+    authGateMessage.classList.remove("hidden")
   }
 }
 
-// Login form
-loginForm.addEventListener('submit', async e => {
+loginForm.addEventListener("submit", async (e) => {
   e.preventDefault()
+  hideAuthError()
+  hideAppMessage()
 
-  const email = loginEmail.value;
-  const password = loginPassword.value;
+  const email = loginEmail.value
+  const password = loginPassword.value
+  const submitBtn = loginForm.querySelector('button[type="submit"]')
 
-  const { error } = await supabase.auth.signInWithPassword({ email, password });
+  submitBtn.disabled = true
+  submitBtn.textContent = "Logging in..."
+
+  const { error } = await supabase.auth.signInWithPassword({ email, password })
+
+  submitBtn.disabled = false
+  submitBtn.textContent = "Log in"
 
   if (error) {
-    alert(`Login failed: ${error.message}`);
-    return;
+    showAuthError(`Login failed: ${error.message}`)
+    return
   }
 
-  loginPassword.value = ''
-
+  loginPassword.value = ""
   await updateAuthUI()
   await loadBooks()
 })
 
-// Logout functionality
-logoutBtn.addEventListener('click', async () => {
-  await supabase.auth.signOut();
-  await updateAuthUI();
-  await loadBooks();
+logoutBtn.addEventListener("click", async () => {
+  await supabase.auth.signOut()
+  await updateAuthUI()
+  await loadBooks()
 })
 
 supabase.auth.onAuthStateChange((_event, session) => {
   updateAuthUI()
-
-  if (session) {
-    loadBooks()
-  }
+  if (session) loadBooks()
 })
 
-const form = document.querySelector("#book-form")
-const bookList = document.querySelector("#books-table tbody")
+modalContainer.addEventListener("click", (e) => {
+  if (e.target === modalContainer) closeModal()
+})
+
+modalCloseBtn.addEventListener("click", closeModal)
+
+function renderBookActions(bookId) {
+  if (!isLoggedIn) return ""
+
+  return `
+    <button class="edit" data-id="${bookId}">Edit</button>
+    <button class="remove" data-id="${bookId}">Delete</button>
+  `
+}
+
+function attachBookActionHandlers() {
+  document.querySelectorAll(".edit").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      const book = booksCache.find((item) => String(item.id) === btn.dataset.id)
+      if (book) openEditModal(book)
+    })
+  })
+
+  document.querySelectorAll(".remove").forEach((btn) => {
+    btn.addEventListener("click", async () => {
+      const book = booksCache.find((item) => String(item.id) === btn.dataset.id)
+      const title = book?.title || "this book"
+
+      if (!confirm(`Remove "${title}" from your library?`)) return
+
+      hideAppMessage()
+      btn.disabled = true
+
+      const { error } = await supabase
+        .from("books")
+        .delete()
+        .eq("id", btn.dataset.id)
+
+      if (error) {
+        btn.disabled = false
+        showAppMessage(`Could not delete book: ${error.message}`, "error")
+        return
+      }
+
+      showAppMessage("Book removed.")
+      await loadBooks()
+    })
+  })
+}
 
 async function loadBooks() {
-  // look at further filtering to remove those not given a rating or not read...
+  hideAppMessage()
+
   const { data, error } = await supabase
     .from("books")
     .select("*")
-    .order('created_at', { ascending: false })
-  if (error) return console.error(error)
+    .order("created_at", { ascending: false })
 
-  bookList.innerHTML = data
+  if (error) {
+    showAppMessage(`Could not load books: ${error.message}`, "error")
+    return
+  }
+
+  booksCache = data || []
+
+  const unreadCount = booksCache.filter((book) => !book.read).length
+  librarySummary.textContent = `${unreadCount} unread book${unreadCount === 1 ? "" : "s"}`
+
+  bookList.innerHTML = booksCache
     .map(
       (book) => `
       <tr>
-        <td>${book.title}</td>
-        <td>${book.author || ""}</td>
-        <td>${book.format || ""}</td>
-        <td>${book.genre || ""}</td>
-        <td>${book.publisher || ""}</td>
-        <td>${book.year_published || ""}</td>
-        <td>${book.purchase_date || ""}</td>
-        <td>${book.notes || ""}</td>
-        <td><button class="edit" data-id=${book.id}>Edit</button></td>
-        <td><button class="remove" data-id=${book.id}>X</button></td>
+        <td>${escapeHtml(book.title)}</td>
+        <td>${escapeHtml(book.author)}</td>
+        <td>${escapeHtml(book.format)}</td>
+        <td>${escapeHtml(book.genre)}</td>
+        <td class="col-read">${formatRead(book.read)}</td>
+        <td class="col-rating">${formatRating(book.rating)}</td>
+        <td class="col-publisher">${escapeHtml(book.publisher)}</td>
+        <td>${escapeHtml(book.year_published)}</td>
+        <td>${escapeHtml(book.purchase_date)}</td>
+        <td class="col-notes">${escapeHtml(book.notes)}</td>
+        <td>${renderBookActions(book.id)}</td>
       </tr>
     `
     )
     .join("")
 
-  const modalContainer = document.querySelector('.modal-container')
-  const formContainer = document.querySelector('.form-container')
-  const editBtns = document.querySelectorAll('.edit')
+  booksCards.innerHTML = booksCache
+    .map(
+      (book) => `
+      <article class="book-card">
+        <h3>${escapeHtml(book.title)}</h3>
+        <p>${escapeHtml(book.author)}</p>
+        <div class="book-card-meta">
+          ${formatRead(book.read)}
+          <span>Rating: ${formatRating(book.rating)}</span>
+          ${book.format ? `<span>${escapeHtml(book.format)}</span>` : ""}
+          ${book.genre ? `<span>${escapeHtml(book.genre)}</span>` : ""}
+        </div>
+        ${book.notes ? `<p>${escapeHtml(book.notes)}</p>` : ""}
+        <div class="book-card-actions">
+          ${renderBookActions(book.id)}
+        </div>
+      </article>
+    `
+    )
+    .join("")
 
-
-  function editForm() {
-    formContainer.innerHTML = `
-    <form id="book-form" method="POST">
-      <label for="title">Title:</label>
-      <input type="text" id="title" name="title" required>
-      <label for="author">Author:</label>
-      <input type="text" id="author" name="author" required>
-
-      <label for="format">Format:</label>
-      <select name="format" id="format" required>
-        <option value="null">Please select</option>
-        <option value="hardback">Hardback</option>
-        <option value="paperback">Paperback</option>
-        <option value="ebook">eBook</option>
-      </select>
-
-      <label for="genre">Genre:</label>
-      <select name="genre" id="genre" multiple>
-        <option>Autobiography</option>
-        <option>Biography</option>
-        <option>Fantasy</option>
-        <option>Fiction</option>
-        <option>History</option>
-        <option>Mystery</option>
-        <option>Mythology</option>
-        <option>Nature/Natural History</option>
-        <option>Non-fiction</option>
-        <option>Science Fiction</option>
-        <option>Other</option>
-      </select>
-
-      <label for="purchase_date">Date of purchase:</label>
-      <input type="date" name="purchase_date" id="purchase_date">
-
-      <label for="publisher">Publisher:</label>
-      <input type="text" name="publisher" id="publisher">
-
-      <label for="year_published">Year Published:</label>
-      <input type="number" name="year_published" id="year_published">
-
-      <label for="notes">Notes:</label>
-      <textarea name="notes" id="notes"></textarea>
-
-      <button type="submit">Save changes</button>
-    </form>
-  `;
-
-    modalContainer.classList.remove('hidden');
-
-    return formContainer.querySelector('#book-form');
-  }
-
-  editBtns.forEach((btn => {
-    btn.addEventListener("click", async (e) => {
-      const row = e.target.closest("tr");
-      const bookId = e.target.dataset.id;
-      const tds = row.querySelectorAll('td');
-
-      const book = {
-        title: tds[0].textContent.trim(),
-        author: tds[1].textContent.trim(),
-        format: tds[2].textContent.trim(),
-        genre: tds[3].textContent.trim(),
-        publisher: tds[4].textContent.trim(),
-        year_published: tds[5].textContent.trim(),
-        purchase_date: tds[6].textContent.trim(),
-        notes: tds[7].textContent.trim(),
-      };
-
-      const form = editForm();
-
-      const titleInput = form.querySelector('#title');
-      const authorInput = form.querySelector('#author');
-      const formatInput = form.querySelector('#format');
-      const genreInput = form.querySelector('#genre');
-      const purchaseDateInput = form.querySelector('#purchase_date');
-      const publisherInput = form.querySelector('#publisher');
-      const yearInput = form.querySelector('#year_published');
-      const notesInput = form.querySelector('#notes');
-
-      // Pre-fill values
-      titleInput.value = book.title;
-      authorInput.value = book.author;
-      if (book.format) formatInput.value = book.format;
-      if (book.genre) genreInput.value = book.genre;
-      purchaseDateInput.value = book.purchase_date;
-      publisherInput.value = book.publisher;
-      yearInput.value = book.year_published;
-      notesInput.value = book.notes;
-
-      form.addEventListener('submit', async (evt) => {
-        evt.preventDefault();
-
-        const payload = {
-          title: titleInput.value.trim(),
-          author: authorInput.value.trim(),
-          format: formatInput.value === 'null' ? null : formatInput.value,
-          genre: genreInput.value,
-          purchase_date: purchaseDateInput.value || null,
-          publisher: publisherInput.value.trim() || null,
-          year_published: yearInput.value ? Number(yearInput.value) : null,
-          notes: notesInput.value.trim() || null,
-        };
-
-        const { error } = await supabase
-          .from('books')
-          .update(payload)
-          .eq('id', bookId);
-
-        if (error) {
-          console.error('Error updating book', error);
-          return;
-        }
-
-        // update table cells
-        tds[0].textContent = payload.title;
-        tds[1].textContent = payload.author;
-        tds[2].textContent = payload.format || '';
-        tds[3].textContent = payload.genre;
-        tds[4].textContent = payload.publisher || '';
-        tds[5].textContent = payload.year_published || '';
-        tds[6].textContent = payload.purchase_date || '';
-        tds[7].textContent = payload.notes || '';
-
-        modalContainer.classList.add('hidden');
-        formContainer.innerHTML = '';
-      });
-    });
-  }));
-
-
-  const removeButtons = document.querySelectorAll(".remove")
-
-  removeButtons.forEach((btn) => {
-    btn.addEventListener("click", async (e) => {
-      const row = e.target.closest("tr")
-      const bookId = e.target.dataset.id
-      // console.log("Deleting book ID:", bookId)
-
-      // remove book row from UI
-      row.remove()
-      // remove from supabase db
-      const { data, error } = await supabase
-        .from("books")
-        .delete()
-        .eq("id", bookId)
-        .select()
-    })
-  })
+  attachBookActionHandlers()
 }
 
 updateAuthUI()
@@ -278,22 +392,29 @@ loadBooks()
 
 form.addEventListener("submit", async (e) => {
   e.preventDefault()
-  const formData = new FormData(form)
+  hideAppMessage()
 
+  const submitBtn = form.querySelector('button[type="submit"]')
+  submitBtn.disabled = true
+  submitBtn.textContent = "Adding..."
+
+  const formData = new FormData(form)
   const book = Object.fromEntries(formData.entries())
   book.read = formData.get("read") ? true : false
   book.purchase_date = formData.get("purchase_date") || null
+  book.rating = formData.get("rating") === "null" ? null : formData.get("rating")
 
-  const { data, error } = await supabase.from("books").insert([book])
-  // console.log(book)
+  const { error } = await supabase.from("books").insert([book])
+
+  submitBtn.disabled = false
+  submitBtn.textContent = "Add Book"
 
   if (error) {
-    console.error("Insert error:", error)
-    // console.log("Error: book not inserted")
-  } else {
-    form.reset()
-    // console.log("Book added:", data)
-    loadBooks()
+    showAppMessage(`Could not add book: ${error.message}`, "error")
+    return
   }
-})
 
+  form.reset()
+  showAppMessage("Book added.")
+  await loadBooks()
+})
