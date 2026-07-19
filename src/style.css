@@ -23,8 +23,7 @@
 
 body {
   font-size: 1.6rem;
-  margin: 0 auto;
-  max-width: 120rem;
+  margin: 0;
   padding: 0 1rem 2rem;
 }
 
@@ -36,24 +35,75 @@ main {
   padding-top: 1rem;
 }
 
-section {
+section,
+#auth-panel {
   display: flex;
-  justify-content: center;
+  flex-direction: column;
+  align-items: center;
 }
 
 form {
   display: flex;
   flex-direction: column;
-  width: 375px;
+  width: 100%;
+  max-width: 375px;
+}
+
+#login-toggle,
+.login-cancel {
+  background: transparent;
+  border: 1px solid currentColor;
+  color: inherit;
+  cursor: pointer;
+  display: none;
+  margin-top: 0.5rem;
+  max-width: 375px;
+  padding: 0.5rem 1rem;
+  width: 100%;
+}
+
+.login-cancel {
+  margin-top: 0;
+}
+
+@media (min-width: 60rem) {
+  #auth-panel:not(.is-logged-in):not(.show-login) #login-toggle {
+    display: block;
+  }
+
+  #auth-panel:not(.is-logged-in):not(.show-login) #login-form,
+  #auth-panel:not(.is-logged-in):not(.show-login) .login-cancel {
+    display: none;
+  }
+
+  #auth-panel.show-login:not(.is-logged-in) #login-form {
+    display: flex;
+  }
+
+  #auth-panel.show-login:not(.is-logged-in) .login-cancel {
+    display: block;
+  }
+
+  #auth-panel.show-login #login-toggle {
+    display: none;
+  }
+}
+
+#auth-panel.is-logged-in #login-form,
+#auth-panel.is-logged-in #login-toggle,
+#auth-panel.is-logged-in .login-cancel {
+  display: none;
 }
 
 #login-form {
-  margin: 0 0.5rem;
+  margin: 0;
 }
 
 #login-form input {
+  box-sizing: border-box;
   margin: 0.5rem 0;
   padding: 0.5rem;
+  width: 100%;
 }
 
 #auth-status {
@@ -63,6 +113,11 @@ form {
 
 #auth-panel {
   margin-bottom: 1rem;
+}
+
+#auth-info {
+  max-width: 375px;
+  width: 100%;
 }
 
 .auth-error {
@@ -93,7 +148,9 @@ input[type=date],
 input[type=number],
 select,
 textarea {
+  box-sizing: border-box;
   padding: 0.5rem;
+  width: 100%;
 }
 
 input[type=checkbox] {
@@ -146,22 +203,67 @@ button[type=button].btn-secondary {
 }
 
 .table-wrapper {
-  overflow-x: auto;
+  width: 100%;
+}
+
+#books-table {
+  border: 1px solid white;
+  table-layout: fixed;
   width: 100%;
 }
 
 #books-table th,
 #books-table td {
+  overflow-wrap: anywhere;
   padding: 0.5rem;
   text-align: left;
-  white-space: nowrap;
+  vertical-align: top;
+  word-break: break-word;
 }
 
-#books-table td.col-notes {
-  max-width: 20rem;
-  overflow: hidden;
-  text-overflow: ellipsis;
+#books-table .col-title {
+  width: 18%;
+}
+
+#books-table .col-author {
+  width: 14%;
+}
+
+#books-table .col-genre {
+  width: 10%;
+}
+
+#books-table .col-read {
+  width: 7%;
+}
+
+#books-table .col-rating {
+  width: 7%;
+}
+
+#books-table .col-publisher {
+  width: 12%;
+}
+
+#books-table .col-year {
+  width: 6%;
+}
+
+#books-table .col-purchase {
+  width: 9%;
+}
+
+#books-table .col-notes {
+  width: 9%;
+}
+
+#books-table .col-actions {
   white-space: nowrap;
+  width: 10%;
+}
+
+#books-table .col-actions .edit {
+  margin-right: 0.5rem;
 }
 
 table {
@@ -308,15 +410,15 @@ footer {
 }
 
 @media (min-width: 60rem) {
-  .col-publisher,
-  .col-notes {
+  #books-table .col-publisher,
+  #books-table .col-notes {
     display: table-cell;
   }
 }
 
 @media (max-width: 59.99rem) {
-  .col-publisher,
-  .col-notes {
+  #books-table .col-publisher,
+  #books-table .col-notes {
     display: none;
   }
 }

@@ -1,7 +1,7 @@
 import "./style.css"
 import javascriptLogo from "./javascript.svg"
 import viteLogo from "/vite.svg"
-import { supabase } from "./supabase.js"
+import { supabase, hasSupabaseConfig } from "./supabase.js"
 
 const footer = document.querySelector("footer")
 
@@ -31,6 +31,9 @@ const GENRE_OPTIONS = `
 `
 
 const loginForm = document.querySelector("#login-form")
+const loginToggle = document.querySelector("#login-toggle")
+const loginCancel = document.querySelector("#login-cancel")
+const authPanel = document.querySelector("#auth-panel")
 const loginEmail = document.querySelector("#login-email")
 const loginPassword = document.querySelector("#login-password")
 const logoutBtn = document.querySelector("#logout-btn")
@@ -67,6 +70,10 @@ function formatRead(read) {
 function formatRating(rating) {
   if (!rating || rating === "null") return "—"
   return `${rating}/5`
+}
+
+function hasRating(book) {
+  return book.rating != null && book.rating !== "" && book.rating !== "null"
 }
 
 function showAppMessage(text, type = "success") {
@@ -210,7 +217,31 @@ function openEditModal(book) {
   modalContainer.classList.remove("hidden")
 }
 
+function openLoginForm() {
+  authPanel.classList.add("show-login")
+  hideAuthError()
+  loginEmail.focus()
+}
+
+function closeLoginForm() {
+  authPanel.classList.remove("show-login")
+  hideAuthError()
+}
+
+loginToggle.addEventListener("click", openLoginForm)
+loginCancel.addEventListener("click", closeLoginForm)
+
 async function updateAuthUI() {
+  if (!supabase) {
+    isLoggedIn = false
+    authPanel.classList.remove("is-logged-in")
+    logoutBtn.classList.add("hidden")
+    authStatus.textContent = "Not logged in"
+    bookSection.classList.add("disabled")
+    authGateMessage.classList.remove("hidden")
+    return
+  }
+
   const { data, error } = await supabase.auth.getSession()
 
   if (error) {
@@ -222,14 +253,15 @@ async function updateAuthUI() {
   isLoggedIn = Boolean(session)
 
   if (session) {
-    loginForm.style.display = "none"
+    authPanel.classList.add("is-logged-in")
+    authPanel.classList.remove("show-login")
     logoutBtn.classList.remove("hidden")
     authStatus.textContent = `Logged in as ${session.user?.email || "user"}`
     bookSection.classList.remove("disabled")
     authGateMessage.classList.add("hidden")
     hideAuthError()
   } else {
-    loginForm.style.display = "flex"
+    authPanel.classList.remove("is-logged-in")
     logoutBtn.classList.add("hidden")
     authStatus.textContent = "Not logged in"
     bookSection.classList.add("disabled")
@@ -241,6 +273,13 @@ loginForm.addEventListener("submit", async (e) => {
   e.preventDefault()
   hideAuthError()
   hideAppMessage()
+
+  if (!supabase) {
+    showAuthError(
+      "Missing Supabase config. Add a .env file with VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY, then restart the dev server."
+    )
+    return
+  }
 
   const email = loginEmail.value
   const password = loginPassword.value
@@ -265,15 +304,19 @@ loginForm.addEventListener("submit", async (e) => {
 })
 
 logoutBtn.addEventListener("click", async () => {
+  closeLoginForm()
+  if (!supabase) return
   await supabase.auth.signOut()
   await updateAuthUI()
   await loadBooks()
 })
 
-supabase.auth.onAuthStateChange((_event, session) => {
-  updateAuthUI()
-  if (session) loadBooks()
-})
+if (supabase) {
+  supabase.auth.onAuthStateChange((_event, session) => {
+    updateAuthUI()
+    if (session) loadBooks()
+  })
+}
 
 modalContainer.addEventListener("click", (e) => {
   if (e.target === modalContainer) closeModal()
@@ -328,6 +371,14 @@ function attachBookActionHandlers() {
 async function loadBooks() {
   hideAppMessage()
 
+  if (!supabase) {
+    showAppMessage(
+      "Missing Supabase config. Copy .env.example to .env, add your keys, then restart the dev server.",
+      "error"
+    )
+    return
+  }
+
   const { data, error } = await supabase
     .from("books")
     .select("*")
@@ -339,31 +390,31 @@ async function loadBooks() {
   }
 
   booksCache = data || []
+  const ratedBooks = booksCache.filter(hasRating)
 
   const unreadCount = booksCache.filter((book) => !book.read).length
   librarySummary.textContent = `${unreadCount} unread book${unreadCount === 1 ? "" : "s"}`
 
-  bookList.innerHTML = booksCache
+  bookList.innerHTML = ratedBooks
     .map(
       (book) => `
       <tr>
-        <td>${escapeHtml(book.title)}</td>
-        <td>${escapeHtml(book.author)}</td>
-        <td>${escapeHtml(book.format)}</td>
-        <td>${escapeHtml(book.genre)}</td>
+        <td class="col-title">${escapeHtml(book.title)}</td>
+        <td class="col-author">${escapeHtml(book.author)}</td>
+        <td class="col-genre">${escapeHtml(book.genre)}</td>
         <td class="col-read">${formatRead(book.read)}</td>
         <td class="col-rating">${formatRating(book.rating)}</td>
         <td class="col-publisher">${escapeHtml(book.publisher)}</td>
-        <td>${escapeHtml(book.year_published)}</td>
-        <td>${escapeHtml(book.purchase_date)}</td>
+        <td class="col-year">${escapeHtml(book.year_published)}</td>
+        <td class="col-purchase">${escapeHtml(book.purchase_date)}</td>
         <td class="col-notes">${escapeHtml(book.notes)}</td>
-        <td>${renderBookActions(book.id)}</td>
+        <td class="col-actions">${renderBookActions(book.id)}</td>
       </tr>
     `
     )
     .join("")
 
-  booksCards.innerHTML = booksCache
+  booksCards.innerHTML = ratedBooks
     .map(
       (book) => `
       <article class="book-card">
@@ -387,12 +438,26 @@ async function loadBooks() {
   attachBookActionHandlers()
 }
 
+if (!hasSupabaseConfig) {
+  showAuthError(
+    "Missing Supabase config. Copy .env.example to .env, add your keys, then restart the dev server."
+  )
+}
+
 updateAuthUI()
 loadBooks()
 
 form.addEventListener("submit", async (e) => {
   e.preventDefault()
   hideAppMessage()
+
+  if (!supabase) {
+    showAppMessage(
+      "Missing Supabase config. Copy .env.example to .env, add your keys, then restart the dev server.",
+      "error"
+    )
+    return
+  }
 
   const submitBtn = form.querySelector('button[type="submit"]')
   submitBtn.disabled = true
