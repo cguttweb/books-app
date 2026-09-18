@@ -72,10 +72,6 @@ function formatRating(rating) {
   return `${rating}/5`
 }
 
-function hasRating(book) {
-  return book.rating != null && book.rating !== "" && book.rating !== "null"
-}
-
 function showAppMessage(text, type = "success") {
   appMessage.textContent = text
   appMessage.className = `app-message ${type}`
@@ -390,12 +386,11 @@ async function loadBooks() {
   }
 
   booksCache = data || []
-  const ratedBooks = booksCache.filter(hasRating)
 
   const unreadCount = booksCache.filter((book) => !book.read).length
   librarySummary.textContent = `${unreadCount} unread book${unreadCount === 1 ? "" : "s"}`
 
-  bookList.innerHTML = ratedBooks
+  bookList.innerHTML = booksCache
     .map(
       (book) => `
       <tr>
@@ -414,7 +409,7 @@ async function loadBooks() {
     )
     .join("")
 
-  booksCards.innerHTML = ratedBooks
+  booksCards.innerHTML = booksCache
     .map(
       (book) => `
       <article class="book-card">
