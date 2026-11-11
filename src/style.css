@@ -99,11 +99,23 @@ form {
   margin: 0;
 }
 
-#login-form input {
+#login-form input,
+.library-filter input {
   box-sizing: border-box;
   margin: 0.5rem 0;
   padding: 0.5rem;
   width: 100%;
+}
+
+.library-filter {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.library-filter input {
+  max-width: 375px;
 }
 
 #auth-status {
