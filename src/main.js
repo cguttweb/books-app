@@ -402,8 +402,6 @@ async function loadBooks() {
         <td class="col-title">${escapeHtml(book.title)}</td>
         <td class="col-author">${escapeHtml(book.author)}</td>
         <td class="col-genre">${escapeHtml(book.genre)}</td>
-        <td class="col-read">${formatRead(book.read)}</td>
-        <td class="col-rating">${formatRating(book.rating)}</td>
         <td class="col-publisher">${escapeHtml(book.publisher)}</td>
         <td class="col-year">${escapeHtml(book.year_published)}</td>
         <td class="col-purchase">${escapeHtml(book.purchase_date)}</td>

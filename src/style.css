@@ -234,27 +234,19 @@ button[type=button].btn-secondary {
 }
 
 #books-table .col-title {
-  width: 18%;
+  width: 24%;
 }
 
 #books-table .col-author {
-  width: 14%;
+  width: 16%;
 }
 
 #books-table .col-genre {
   width: 10%;
 }
 
-#books-table .col-read {
-  width: 7%;
-}
-
-#books-table .col-rating {
-  width: 7%;
-}
-
 #books-table .col-publisher {
-  width: 12%;
+  width: 14%;
 }
 
 #books-table .col-year {
